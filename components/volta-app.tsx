@@ -1,12 +1,12 @@
 "use client";
 
-import maplibregl from "maplibre-gl";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type Connector = { type: string; current: string; powerKw: number; quantity: number; status: string };
 type Station = { id: string; name: string; operator: string; address: string; city: string; lat: number; lng: number; connectors: Connector[]; tariffKwh: number | null; payment: string; status: string; statusLabel: string; freshness: string; confidence: number; lastVerified: string; sourceName: string; sourceUrl: string; relatedUrl?: string | null };
 type Vehicle = { id: string; brand: string; model: string; usableKwh: number; maxAcKw: number; maxDcKw: number; acConnector: string; dcConnector: string; consumptionKwh100: number };
 type Location = { lat: number; lng: number };
+type MapLibreModule = typeof import("maplibre-gl");
 
 type Props = { stations: Station[]; vehicles: Vehicle[] };
 
@@ -30,8 +30,10 @@ function duration(n: number) { return n < 60 ? `${n} min` : `${Math.floor(n / 60
 
 export function VoltaApp({ stations, vehicles }: Props) {
   const mapNode = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<maplibregl.Map | null>(null);
-  const markers = useRef<maplibregl.Marker[]>([]);
+  const mapRef = useRef<import("maplibre-gl").Map | null>(null);
+  const mapModuleRef = useRef<MapLibreModule | null>(null);
+  const markers = useRef<import("maplibre-gl").Marker[]>([]);
+  const [mapReady, setMapReady] = useState(false);
   const [vehicleId, setVehicleId] = useState(vehicles[0]?.id ?? "");
   const [start, setStart] = useState(20);
   const [target, setTarget] = useState(80);
@@ -43,7 +45,7 @@ export function VoltaApp({ stations, vehicles }: Props) {
   const [selected, setSelected] = useState<Station | null>(null);
   const [location, setLocation] = useState<Location | null>(null);
   const [notice, setNotice] = useState("");
-  const vehicle = vehicles.find(v => v.id === vehicleId) ?? vehicles[0];
+  const vehicle = (vehicles.find(v => v.id === vehicleId) ?? vehicles[0])!;
 
   const rows = useMemo(() => stations.map(station => ({
     station,
@@ -59,15 +61,30 @@ export function VoltaApp({ stations, vehicles }: Props) {
   }).sort((a, b) => location ? (a.distance ?? 999) - (b.distance ?? 999) : b.station.confidence - a.station.confidence), [stations, vehicle, start, target, location, query, operational, power, current]);
 
   useEffect(() => {
-    if (!mapNode.current || mapRef.current) return;
-    mapRef.current = new maplibregl.Map({ container: mapNode.current, style: "https://demotiles.maplibre.org/style.json", center: [-46.6333, -23.5505], zoom: 10.2 });
-    mapRef.current.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
-    return () => { mapRef.current?.remove(); mapRef.current = null; };
+    let cancelled = false;
+    async function bootMap() {
+      if (!mapNode.current || mapRef.current) return;
+      const module = await import("maplibre-gl");
+      if (cancelled || !mapNode.current) return;
+      mapModuleRef.current = module;
+      const map = new module.Map({ container: mapNode.current, style: "https://demotiles.maplibre.org/style.json", center: [-46.6333, -23.5505], zoom: 10.2 });
+      map.addControl(new module.NavigationControl({ showCompass: false }), "top-right");
+      mapRef.current = map;
+      map.once("load", () => setMapReady(true));
+    }
+    bootMap().catch(() => setNotice("O mapa não pôde ser carregado."));
+    return () => {
+      cancelled = true;
+      mapRef.current?.remove();
+      mapRef.current = null;
+      mapModuleRef.current = null;
+    };
   }, []);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
+    const module = mapModuleRef.current;
+    if (!map || !module || !mapReady) return;
     markers.current.forEach(m => m.remove());
     markers.current = rows.map(({ station }) => {
       const el = document.createElement("button");
@@ -76,9 +93,9 @@ export function VoltaApp({ stations, vehicles }: Props) {
       el.title = station.name;
       el.innerHTML = `<span>${Math.round(maxPower(station))}</span>`;
       el.onclick = () => setSelected(station);
-      return new maplibregl.Marker({ element: el }).setLngLat([station.lng, station.lat]).addTo(map);
+      return new module.Marker({ element: el }).setLngLat([station.lng, station.lat]).addTo(map);
     });
-  }, [rows]);
+  }, [rows, mapReady]);
 
   function locate() {
     if (!navigator.geolocation) return setNotice("Geolocalização indisponível neste dispositivo.");
