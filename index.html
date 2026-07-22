@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#101419" />
+  <meta name="description" content="VOLTA Marco 1 — mapa de recarga com dados públicos reais de São Paulo." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>VOLTA — Marco 1</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-wrap">
+        <div class="brand-mark" aria-hidden="true">V</div>
+        <div>
+          <div class="brand">VOLTA</div>
+          <div class="brand-subtitle">MARCO 1 · SÃO PAULO</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span id="datasetBadge" class="demo-badge">CARREGANDO DADOS</span>
+        <button id="installBtn" class="ghost-button hidden">Instalar app</button>
+        <button class="avatar" aria-label="Perfil">NN</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <section class="panel vehicle-panel">
+          <div class="section-label">SEU VEÍCULO</div>
+          <select id="vehicleSelect" aria-label="Selecione seu veículo"></select>
+          <div id="vehicleMeta" class="vehicle-meta"></div>
+
+          <div class="charge-range">
+            <div class="range-row">
+              <label for="currentSoc">Carga atual</label>
+              <output id="currentSocValue">24%</output>
+            </div>
+            <input id="currentSoc" type="range" min="5" max="90" value="24" />
+          </div>
+
+          <div class="charge-range">
+            <div class="range-row">
+              <label for="targetSoc">Carga desejada</label>
+              <output id="targetSocValue">80%</output>
+            </div>
+            <input id="targetSoc" type="range" min="20" max="100" value="80" />
+          </div>
+        </section>
+
+        <section class="panel filters-panel">
+          <div class="panel-heading">
+            <div class="section-label">FILTROS</div>
+            <button id="clearFilters" class="text-button">Limpar</button>
+          </div>
+
+          <label class="field-label" for="powerFilter">Potência mínima</label>
+          <select id="powerFilter">
+            <option value="0">Qualquer potência</option>
+            <option value="7">7 kW+</option>
+            <option value="22">22 kW+</option>
+            <option value="50">50 kW+</option>
+            <option value="100">100 kW+</option>
+          </select>
+
+          <label class="field-label">Tipo de carga</label>
+          <div class="segmented" id="currentTypeFilter">
+            <button class="segment active" data-value="all">Todos</button>
+            <button class="segment" data-value="AC">AC</button>
+            <button class="segment" data-value="DC">DC</button>
+          </div>
+
+          <label class="checkbox-row">
+            <input id="compatibleOnly" type="checkbox" checked />
+            <span>Somente compatíveis</span>
+          </label>
+          <label class="checkbox-row">
+            <input id="confirmedOnly" type="checkbox" />
+            <span>Operacional com dado recente</span>
+          </label>
+        </section>
+
+        <section class="pilot-card">
+          <div class="pilot-kicker">HIPÓTESE 01</div>
+          <p>Um único mapa consegue reduzir a fricção antes da recarga?</p>
+          <div class="pilot-progress"><span style="width: 58%"></span></div>
+          <small id="pilotDatasetMeta">Carregando base pública…</small>
+        </section>
+      </aside>
+
+      <section class="workspace">
+        <div class="workspace-head">
+          <div>
+            <p class="eyebrow">RECARGA INTELIGENTE</p>
+            <h1>Onde faz sentido carregar agora?</h1>
+          </div>
+          <div class="view-toggle" role="group" aria-label="Alternar visualização">
+            <button id="mapViewBtn" class="active">Mapa</button>
+            <button id="listViewBtn">Lista</button>
+          </div>
+        </div>
+
+        <div class="summary-strip">
+          <div><strong id="resultCount">0</strong><span>pontos encontrados</span></div>
+          <div><strong id="fastestTime">—</strong><span>melhor estimativa</span></div>
+          <div><strong id="lowestCost">—</strong><span>menor custo estimado</span></div>
+        </div>
+
+        <div id="mapView" class="map-view">
+          <div class="map-grid" aria-hidden="true"></div>
+          <div class="map-label label-center">SÃO PAULO</div>
+          <div class="map-road road-a"></div>
+          <div class="map-road road-b"></div>
+          <div class="map-road road-c"></div>
+          <div id="markersLayer" class="markers-layer"></div>
+          <div class="map-legend">
+            <span><i class="legend-dot compatible"></i> Compatível</span>
+            <span><i class="legend-dot limited"></i> Potência limitada pelo carro</span>
+            <span><i class="legend-dot stale"></i> Dado antigo</span>
+            <span><i class="legend-dot unavailable"></i> Não operacional</span>
+          </div>
+        </div>
+
+        <div id="listView" class="list-view hidden"></div>
+      </section>
+    </main>
+
+    <aside id="stationDrawer" class="station-drawer" aria-hidden="true">
+      <button id="closeDrawer" class="drawer-close" aria-label="Fechar">×</button>
+      <div id="drawerContent"></div>
+    </aside>
+
+    <div id="sessionModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="sessionTitle">
+      <div class="session-modal">
+        <button id="closeSession" class="drawer-close" aria-label="Fechar">×</button>
+        <div class="session-icon">⚡</div>
+        <p class="eyebrow">SESSÃO DEMONSTRATIVA</p>
+        <h2 id="sessionTitle">Preparando recarga</h2>
+        <p id="sessionSubtitle" class="session-subtitle"></p>
+        <div class="session-meter"><span id="sessionProgress"></span></div>
+        <div class="session-stats">
+          <div><strong id="sessionEnergy">0,0 kWh</strong><span>energia</span></div>
+          <div><strong id="sessionCost">R$ 0,00</strong><span>custo</span></div>
+          <div><strong id="sessionElapsed">00:00</strong><span>tempo</span></div>
+        </div>
+        <button id="sessionAction" class="primary-button">Pré-autorizar cartão de teste</button>
+        <small>Sem cobrança real. Este fluxo simula autorização, início, consumo e encerramento.</small>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" role="status"></div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
