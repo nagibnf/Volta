@@ -1,28 +1,26 @@
-# VOLTA
+# VOLTA Core
 
-Pilot Zero de uma plataforma unificada para localizar, comparar e planejar recargas de veículos elétricos.
+Nova fundação do VOLTA em Next.js e TypeScript.
 
-## Marco atual
+## Funcionalidades
 
-- PWA responsiva para desktop e mobile
-- 23 pontos reais curados no município de São Paulo
-- filtros por potência, corrente e compatibilidade
-- estimativa de energia, tempo, custo e autonomia
-- indicação de fonte, data de verificação e nível de confiança
-- jornada simulada de pagamento e recarga
+- mapa real com MapLibre;
+- 23 estações curadas em São Paulo;
+- catálogo inicial de veículos;
+- filtros por potência, corrente e status;
+- geolocalização e distância;
+- compatibilidade por conector;
+- estimativa de energia, tempo, custo e autonomia;
+- navegação por Google Maps e Waze;
+- validação de estação e registro de recarga no navegador;
+- APIs de estações, veículos e saúde;
+- esquema PostgreSQL preparado para evolução full-stack.
 
-## Publicação na Vercel
+## Execução
 
-O projeto é estático e não exige build.
+```bash
+npm install
+npm run dev
+```
 
-- Framework Preset: `Other`
-- Root Directory: `.`
-- Build Command: vazio
-- Output Directory: vazio
-- Install Command: vazio
-
-Ao importar este repositório na Vercel, a plataforma publicará o `index.html` da raiz.
-
-## Dados
-
-Os pontos do protótipo usam dados públicos do Open Charge Map. Ausência de tarifa é tratada como informação desconhecida, não como gratuidade.
+A branch `agent/volta-core` deve ser validada pelo preview da Vercel antes de qualquer merge em `main`.
