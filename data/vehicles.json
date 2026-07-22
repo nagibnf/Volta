@@ -1,0 +1,8 @@
+[
+  {"id":"byd-dolphin","brand":"BYD","model":"Dolphin GS","usableKwh":44.9,"maxAcKw":7,"maxDcKw":60,"acConnector":"Type 2","dcConnector":"CCS2","consumptionKwh100":13.8},
+  {"id":"byd-dolphin-mini","brand":"BYD","model":"Dolphin Mini","usableKwh":38,"maxAcKw":7,"maxDcKw":40,"acConnector":"Type 2","dcConnector":"CCS2","consumptionKwh100":12.1},
+  {"id":"volvo-ex30","brand":"Volvo","model":"EX30 Extended Range","usableKwh":64,"maxAcKw":11,"maxDcKw":153,"acConnector":"Type 2","dcConnector":"CCS2","consumptionKwh100":15.7},
+  {"id":"gwm-ora-03","brand":"GWM","model":"Ora 03 Skin","usableKwh":45.4,"maxAcKw":6.6,"maxDcKw":67,"acConnector":"Type 2","dcConnector":"CCS2","consumptionKwh100":14.1},
+  {"id":"renault-kwid-et","brand":"Renault","model":"Kwid E-Tech","usableKwh":26.8,"maxAcKw":7.4,"maxDcKw":30,"acConnector":"Type 2","dcConnector":"CCS2","consumptionKwh100":12.7},
+  {"id":"bmw-i4","brand":"BMW","model":"i4 eDrive40","usableKwh":80.7,"maxAcKw":11,"maxDcKw":205,"acConnector":"Type 2","dcConnector":"CCS2","consumptionKwh100":17.1}
+]
